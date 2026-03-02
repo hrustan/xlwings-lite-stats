@@ -45,6 +45,14 @@ For the fastest path to a working workbook, use the single bundled file:
 
 That's it — no folder structure, no multiple imports.
 
+> **Dependencies:** This template relies only on core scientific packages
+> (`numpy`, `pandas`, `scipy`, `statsmodels`, `matplotlib`) that are already
+> preinstalled in the xlwings Lite / Pyodide runtime, so you do **not** need
+> a separate `requirements.txt` for the Quick Start flow. If you later add
+> extra third-party packages that are available in Pyodide, create and import
+> a `requirements.txt` file via the Editor tab so they are loaded
+> automatically after **Restart**.
+
 > For those who prefer the full modular structure (separate files per script),
 > see [Instructor / Initial Setup](#instructor--initial-setup-one-time) below.
 

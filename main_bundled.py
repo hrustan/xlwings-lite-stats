@@ -143,18 +143,40 @@ def write_results_block(
 
 
 def _flatten(range_value) -> list:
-    """Flatten an Excel range value (list-of-lists or flat list) to a list of floats."""
+    """Flatten an Excel range value (list-of-lists or flat list) to a list of floats.
+
+    If a non-numeric value that cannot be converted to ``float`` is encountered,
+    a two-dimensional ``[["Error", <message>]]`` block is returned so that Excel
+    shows a friendly error instead of ``#VALUE!``.
+    """
     if range_value is None:
         return []
+
+    # Scalar value: attempt to convert directly
     if not isinstance(range_value, list):
-        return [float(range_value)]
+        try:
+            return [float(range_value)]
+        except (TypeError, ValueError):
+            return [["Error", "Non-numeric data encountered in range. Only numeric values are allowed."]]
+
+    # List or list-of-lists: flatten first
     flat = []
     for item in range_value:
         if isinstance(item, list):
             flat.extend(item)
         else:
             flat.append(item)
-    return [float(v) for v in flat if v is not None]
+
+    numeric_values = []
+    for v in flat:
+        if v is None:
+            continue
+        try:
+            numeric_values.append(float(v))
+        except (TypeError, ValueError):
+            return [["Error", "Non-numeric data encountered in range. Only numeric values are allowed."]]
+
+    return numeric_values
 
 
 # ── Scripts (@xw.script → appear as task pane buttons) ────────────────────────
@@ -450,7 +472,15 @@ def run_time_series(book: xw.Book) -> None:
 
     range_address = sheet["B2"].value
     window_raw = sheet["B3"].value
-    window = int(window_raw) if window_raw is not None else 3
+
+    if window_raw is None:
+        window = 3
+    else:
+        try:
+            window = int(window_raw)
+        except (TypeError, ValueError):
+            sheet["D2"].value = "Error: Rolling window (B3) must be an integer."
+            return
 
     if not range_address:
         sheet["D2"].value = "Error: Enter time series range address in B2."
@@ -541,10 +571,54 @@ def run_monte_carlo(book: xw.Book) -> None:
     std_raw = sheet["B4"].value
     periods_raw = sheet["B5"].value
 
-    n_sims = int(n_sims_raw) if n_sims_raw is not None else 10_000
-    mean = float(mean_raw) if mean_raw is not None else 0.0
-    std = float(std_raw) if std_raw is not None else 1.0
-    periods = int(periods_raw) if periods_raw is not None else 1
+    # Parse number of simulations (B2), defaulting if blank but validating type and range
+    if n_sims_raw is None:
+        n_sims = 10_000
+    else:
+        try:
+            n_sims = int(n_sims_raw)
+        except (TypeError, ValueError):
+            sheet["D2"].value = "Error: Number of simulations (B2) must be a numeric value."
+            return
+
+    # Parse mean (B3), defaulting if blank but validating type
+    if mean_raw is None:
+        mean = 0.0
+    else:
+        try:
+            mean = float(mean_raw)
+        except (TypeError, ValueError):
+            sheet["D2"].value = "Error: Mean (B3) must be a numeric value."
+            return
+
+    # Parse standard deviation (B4), defaulting if blank but validating type
+    if std_raw is None:
+        std = 1.0
+    else:
+        try:
+            std = float(std_raw)
+        except (TypeError, ValueError):
+            sheet["D2"].value = "Error: Standard deviation (B4) must be a numeric value."
+            return
+
+    # Parse number of periods (B5), defaulting if blank but validating type and range
+    if periods_raw is None:
+        periods = 1
+    else:
+        try:
+            periods = int(periods_raw)
+        except (TypeError, ValueError):
+            sheet["D2"].value = "Error: Number of periods (B5) must be an integer value."
+            return
+
+    # Validate parameter ranges
+    if n_sims < 1:
+        sheet["D2"].value = "Error: Number of simulations (B2) must be at least 1."
+        return
+
+    if periods < 1:
+        sheet["D2"].value = "Error: Number of periods (B5) must be at least 1."
+        return
 
     if std <= 0:
         sheet["D2"].value = "Error: Standard deviation (B4) must be greater than 0."
