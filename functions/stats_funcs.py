@@ -46,12 +46,20 @@ def descriptive_stats(data_range):
     if len(data) == 0:
         return [["Error", "No data"]]
 
+    # std/var with ddof=1 require at least 2 observations
+    if len(data) < 2:
+        std_val = float("nan")
+        var_val = float("nan")
+    else:
+        std_val = round(float(np.std(data, ddof=1)), 8)
+        var_val = round(float(np.var(data, ddof=1)), 8)
+
     stats = [
         ["Count", int(len(data))],
         ["Mean", round(float(np.mean(data)), 8)],
         ["Median", round(float(np.median(data)), 8)],
-        ["Std Dev", round(float(np.std(data, ddof=1)), 8)],
-        ["Variance", round(float(np.var(data, ddof=1)), 8)],
+        ["Std Dev", std_val],
+        ["Variance", var_val],
         ["Min", round(float(np.min(data)), 8)],
         ["Max", round(float(np.max(data)), 8)],
         ["Skewness", round(float(skew(data)), 8)],
@@ -77,6 +85,8 @@ def z_score(data_range):
     raw = _flatten(data_range)
     if len(raw) == 0:
         return [["Error: No data"]]
+    if len(raw) < 2:
+        return [["Error: Need at least 2 data points for z-scores"]]
 
     data = np.array(raw)
     scores = scipy_zscore(data, ddof=1)

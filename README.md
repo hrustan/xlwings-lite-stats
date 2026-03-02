@@ -31,13 +31,16 @@ xlwings Lite has a built-in code editor accessible from its task pane. Follow th
 |---|---|
 | `main.py` | `main.py` |
 | `requirements.txt` | `requirements.txt` |
+| `utils/__init__.py` | *(create empty file; marks `utils` as a package)* |
 | `utils/excel_helpers.py` | `utils/excel_helpers.py` |
+| `scripts/__init__.py` | *(create empty file; marks `scripts` as a package)* |
 | `scripts/histogram.py` | `scripts/histogram.py` |
 | `scripts/scatterplot.py` | `scripts/scatterplot.py` |
 | `scripts/regression.py` | `scripts/regression.py` |
 | `scripts/chi_squared.py` | `scripts/chi_squared.py` |
 | `scripts/time_series.py` | `scripts/time_series.py` |
 | `scripts/monte_carlo.py` | `scripts/monte_carlo.py` |
+| `functions/__init__.py` | *(create empty file; marks `functions` as a package)* |
 | `functions/regression_funcs.py` | `functions/regression_funcs.py` |
 | `functions/stats_funcs.py` | `functions/stats_funcs.py` |
 

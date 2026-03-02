@@ -52,6 +52,14 @@ def run_time_series(book: xw.Book) -> None:
         return
 
     n = len(series)
+
+    if window < 2:
+        sheet["D2"].value = "Error: Rolling window (B3) must be at least 2."
+        return
+    if window > n:
+        sheet["D2"].value = f"Error: Rolling window ({window}) exceeds series length ({n})."
+        return
+
     arr = np.array(series, dtype=float)
     x = np.arange(n)
 

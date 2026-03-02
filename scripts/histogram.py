@@ -40,7 +40,7 @@ def run_histogram(book: xw.Book) -> None:
         sheet["D2"].value = "Error: No numeric data found in the specified range."
         return
 
-    # Compute histogram using numpy (auto bin count via Sturges' rule)
+    # Compute histogram using numpy with default binning (10 bins)
     counts, bin_edges = np.histogram(data)
 
     # Write headers

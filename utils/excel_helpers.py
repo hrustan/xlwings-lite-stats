@@ -28,12 +28,15 @@ def get_range_as_df(sheet, range_address: str) -> pd.DataFrame:
 def get_range_as_list(sheet, range_address: str) -> list:
     """Read an Excel range into a flat Python list of floats.
 
+    Non-numeric and blank (``None``) values are silently skipped.
+
     Args:
         sheet: An xlwings Sheet object.
         range_address: The range address string, e.g. ``"A1:A20"``.
 
     Returns:
-        A flat list of float values from the range, with ``None`` values dropped.
+        A flat list of float values from the range, with non-numeric and
+        ``None`` values dropped.
     """
     raw = sheet[range_address].value
     # Flatten nested lists (multi-row/column ranges) into a single list
@@ -44,10 +47,20 @@ def get_range_as_list(sheet, range_address: str) -> list:
                 flat.extend(item)
             else:
                 flat.append(item)
-        return [float(v) for v in flat if v is not None]
-    if raw is None:
+    elif raw is None:
         return []
-    return [float(raw)]
+    else:
+        flat = [raw]
+
+    result = []
+    for v in flat:
+        if v is None:
+            continue
+        try:
+            result.append(float(v))
+        except (TypeError, ValueError):
+            continue
+    return result
 
 
 def write_df_to_sheet(sheet, df: pd.DataFrame, start_cell: str) -> None:

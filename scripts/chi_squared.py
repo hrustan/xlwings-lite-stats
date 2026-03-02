@@ -48,7 +48,22 @@ def run_chi_squared(book: xw.Book) -> None:
     elif not isinstance(raw[0], list):
         raw = [[v] for v in raw]
 
-    observed = np.array([[float(cell) for cell in row] for row in raw])
+    # Validate and convert cells to floats, rejecting blanks or non-numeric values
+    numeric_rows = []
+    for row in raw:
+        numeric_row = []
+        for cell in row:
+            try:
+                numeric_row.append(float(cell))
+            except (TypeError, ValueError):
+                sheet["D2"].value = (
+                    "Error: Contingency table must contain only numeric values "
+                    "and no blank cells."
+                )
+                return
+        numeric_rows.append(numeric_row)
+
+    observed = np.array(numeric_rows, dtype=float)
 
     chi2, p_value, dof, expected = chi2_contingency(observed)
 

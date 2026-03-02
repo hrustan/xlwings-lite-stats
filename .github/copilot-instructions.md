@@ -12,7 +12,7 @@ This is an xlwings Lite add-in for Excel. Python runs via Pyodide (WebAssembly) 
 ## Code Patterns
 - Scripts (run via buttons): decorated with `@xw.script` or imported in main.py; always accept `book: xw.Book` as first argument
 - Custom functions (Excel formulas): decorated with `@xw.func`; use `@xw.arg` for type conversion
-- Use `utils/excel_helpers.py` for all Excel read/write operations — do not inline sheet access in scripts
+- Use `utils/excel_helpers.py` for bulk range reads/writes and formatted results blocks — scripts may read individual config cells (e.g., `sheet["B2"].value`) directly, but bulk data I/O and results output should go through helpers
 - All range addresses are read from well-known cells (e.g., `sheet["B2"].value`) — never hardcode data ranges
 
 ## Testing

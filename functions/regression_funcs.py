@@ -40,10 +40,15 @@ def slope_intercept(y_range, x_range):
 
     Returns:
         A 1×2 array ``[[slope, intercept]]`` suitable for spilling into two
-        adjacent cells in Excel.
+        adjacent cells in Excel, or ``[["Error", message]]`` if inputs are
+        invalid.
     """
     y = _flatten(y_range)
     x = _flatten(x_range)
+    if len(x) < 2 or len(y) < 2:
+        return [["Error", "Need at least 2 data points"]]
+    if len(x) != len(y):
+        return [["Error", "X and Y must have the same length"]]
     slope, intercept, *_ = linregress(x, y)
     return [[round(slope, 8), round(intercept, 8)]]
 
@@ -59,9 +64,14 @@ def r_squared(y_range, x_range):
         x_range: Excel range containing the independent variable values.
 
     Returns:
-        The R² value as a scalar float.
+        The R² value as a scalar float, or an error string if inputs are
+        invalid.
     """
     y = _flatten(y_range)
     x = _flatten(x_range)
+    if len(x) < 2 or len(y) < 2:
+        return "Error: Need at least 2 data points"
+    if len(x) != len(y):
+        return "Error: X and Y must have the same length"
     _, _, r_value, *_ = linregress(x, y)
     return round(r_value ** 2, 8)

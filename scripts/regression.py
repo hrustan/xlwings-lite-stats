@@ -15,7 +15,7 @@ import numpy as np
 import statsmodels.api as sm
 import xlwings as xw
 
-from utils.excel_helpers import get_range_as_list, write_results_block
+from utils.excel_helpers import write_results_block
 
 
 @xw.script
@@ -40,7 +40,20 @@ def run_regression(book: xw.Book) -> None:
         sheet["D2"].value = "Error: Enter Y range in B2 and X range in B3."
         return
 
-    y = get_range_as_list(sheet, y_address)
+    # Read Y directly to preserve row alignment (do not use get_range_as_list
+    # which silently drops blanks and could misalign rows relative to X).
+    y_raw = sheet[y_address].value
+    if y_raw is None:
+        sheet["D2"].value = "Error: No data found in the Y range."
+        return
+
+    # Normalise Y to a 1-D list
+    if not isinstance(y_raw, list):
+        y_list = [y_raw]
+    elif isinstance(y_raw[0], list):
+        y_list = [row[0] for row in y_raw]
+    else:
+        y_list = y_raw
 
     # Read X — may be single or multi-column
     x_raw = sheet[x_address].value
@@ -48,20 +61,40 @@ def run_regression(book: xw.Book) -> None:
         sheet["D2"].value = "Error: No data found in the X range."
         return
 
-    # Normalise to a 2-D list of rows
+    # Normalise X to a 2-D list of rows
     if not isinstance(x_raw, list):
-        x_raw = [[x_raw]]
+        x_rows = [[x_raw]]
     elif not isinstance(x_raw[0], list):
-        x_raw = [[v] for v in x_raw]
+        x_rows = [[v] for v in x_raw]
+    else:
+        x_rows = x_raw
 
-    x_data = np.array(
-        [[float(cell) for cell in row] for row in x_raw if any(v is not None for v in row)]
-    )
-    y_arr = np.array(y)
-
-    if len(y_arr) != len(x_data):
+    if len(y_list) != len(x_rows):
         sheet["D2"].value = "Error: Y and X ranges must have the same number of rows."
         return
+
+    # Convert to numeric arrays, validating no blanks or non-numeric cells
+    if any(v is None for v in y_list):
+        sheet["D2"].value = "Error: Y range must not contain blank cells."
+        return
+    try:
+        y_arr = np.array([float(v) for v in y_list])
+    except (TypeError, ValueError):
+        sheet["D2"].value = "Error: Y range must contain only numeric values."
+        return
+
+    x_numeric_rows = []
+    for row in x_rows:
+        if any(v is None for v in row):
+            sheet["D2"].value = "Error: X range must not contain blank cells."
+            return
+        try:
+            x_numeric_rows.append([float(cell) for cell in row])
+        except (TypeError, ValueError):
+            sheet["D2"].value = "Error: X range must contain only numeric values."
+            return
+
+    x_data = np.array(x_numeric_rows)
 
     # Add constant for intercept
     x_with_const = sm.add_constant(x_data)
