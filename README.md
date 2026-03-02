@@ -32,6 +32,22 @@ no extra security pop-ups for students.
 > cleared. With Import/Export the scripts are embedded in the workbook itself,
 > so they are always available as long as the xlwings Lite add-in is installed.
 
+### Quick Start (Single-File Import)
+
+For the fastest path to a working workbook, use the single bundled file:
+
+1. Download **`main_bundled.py`** from the root of this repository.
+2. Open Excel and open a workbook (new or existing).
+3. Open the xlwings Lite task pane: **Home → xlwings → Open Task Pane**.
+4. Click the **Editor** tab → **Import** → select `main_bundled.py`.
+5. Click **Restart** in the task pane.
+6. **Save the workbook** (`.xlsx`). All scripts and custom functions are now embedded.
+
+That's it — no folder structure, no multiple imports.
+
+> For those who prefer the full modular structure (separate files per script),
+> see [Instructor / Initial Setup](#instructor--initial-setup-one-time) below.
+
 ### Instructor / Initial Setup (one-time)
 
 The instructor prepares a workbook once and shares it with the class:
