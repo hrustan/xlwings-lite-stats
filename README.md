@@ -6,7 +6,7 @@
 
 ## What Is This?
 
-**xlwings-lite-stats** is an Excel add-in built on [xlwings Lite](https://docs.xlwings.org/en/latest/xlwings_lite.html) that replicates the functionality of a course-provided `.xlam` statistical analysis package. Python runs via [Pyodide](https://pyodide.org/) (WebAssembly) inside Excel — classmates only need to install the free xlwings Lite add-in from the Microsoft AppSource store and open the shared workbook.
+**xlwings-lite-stats** is an Excel add-in built on [xlwings Lite](https://docs.xlwings.org/en/latest/xlwings_lite.html) that replicates the functionality of a course-provided `.xlam` statistical analysis package. Python runs via [Pyodide](https://pyodide.org/) (WebAssembly) inside Excel — classmates only need to install the free xlwings Lite add-in from the Microsoft AppSource store and open the shared workbook. All Python scripts are embedded directly in the workbook file, so they persist across closing, restarting, and shutting down Excel.
 
 ---
 
@@ -21,31 +21,63 @@ No Python, pip, or conda installation is required on your machine.
 
 ## How to Load Into Excel
 
-xlwings Lite has a built-in code editor accessible from its task pane. Follow these steps to load all modules:
+xlwings Lite stores Python files as Custom XML parts **inside** the workbook.
+This means the scripts travel with the `.xlsx` file and persist across closing,
+restarting, and shutting down Excel — no "Mount local folder" step required and
+no extra security pop-ups for students.
 
-1. Open the xlwings Lite task pane in Excel (**Home → xlwings → Open Task Pane**).
-2. Click the **Editor** tab inside the task pane.
-3. For each file listed below, create a new file in the editor using the exact filename shown, then paste the contents:
+> **Why Import/Export instead of Mount Local Folder?**
+> Mounting a local folder requires confirming security pop-ups, may need
+> multiple restarts, and the mount can be lost when the Office cache is
+> cleared. With Import/Export the scripts are embedded in the workbook itself,
+> so they are always available as long as the xlwings Lite add-in is installed.
 
-| File to create in editor | Source file in this repo |
-|---|---|
-| `main.py` | `main.py` |
-| `requirements.txt` | `requirements.txt` |
-| `utils/__init__.py` | *(create empty file; marks `utils` as a package)* |
-| `utils/excel_helpers.py` | `utils/excel_helpers.py` |
-| `scripts/__init__.py` | *(create empty file; marks `scripts` as a package)* |
-| `scripts/histogram.py` | `scripts/histogram.py` |
-| `scripts/scatterplot.py` | `scripts/scatterplot.py` |
-| `scripts/regression.py` | `scripts/regression.py` |
-| `scripts/chi_squared.py` | `scripts/chi_squared.py` |
-| `scripts/time_series.py` | `scripts/time_series.py` |
-| `scripts/monte_carlo.py` | `scripts/monte_carlo.py` |
-| `functions/__init__.py` | *(create empty file; marks `functions` as a package)* |
-| `functions/regression_funcs.py` | `functions/regression_funcs.py` |
-| `functions/stats_funcs.py` | `functions/stats_funcs.py` |
+### Instructor / Initial Setup (one-time)
 
-4. Save each file and click **Restart** in the task pane to reload the Python environment.
-5. The script buttons (Histogram, Scatter Plot, etc.) will appear in the task pane automatically.
+The instructor prepares a workbook once and shares it with the class:
+
+1. Clone or download this repository to your computer.
+2. Open a new Excel workbook (or the workbook you want to distribute).
+3. Open the xlwings Lite task pane (**Home → xlwings → Open Task Pane**).
+4. Click the **Editor** tab inside the task pane.
+5. Use the **Import** button to import all of the following files from the
+   cloned repository folder, preserving the directory structure:
+
+   | File to import | Description |
+   |---|---|
+   | `main.py` | Entry point — registers all scripts & functions |
+   | `requirements.txt` | Pyodide-compatible package list |
+   | `utils/__init__.py` | Marks `utils` as a package (empty file) |
+   | `utils/excel_helpers.py` | Shared Excel I/O helpers |
+   | `scripts/__init__.py` | Marks `scripts` as a package (empty file) |
+   | `scripts/histogram.py` | Histogram analysis script |
+   | `scripts/scatterplot.py` | Scatter plot script |
+   | `scripts/regression.py` | OLS regression script |
+   | `scripts/chi_squared.py` | Chi-squared test script |
+   | `scripts/time_series.py` | Time series analysis script |
+   | `scripts/monte_carlo.py` | Monte Carlo simulation script |
+   | `functions/__init__.py` | Marks `functions` as a package (empty file) |
+   | `functions/regression_funcs.py` | Regression UDFs |
+   | `functions/stats_funcs.py` | Descriptive statistics UDFs |
+
+6. Click **Restart** in the task pane to load the Python environment and
+   install the required packages.
+7. Verify the script buttons (Histogram, Scatter Plot, etc.) appear in the
+   task pane.
+8. **Save the workbook** (`.xlsx`). The Python files are now embedded inside it.
+9. Distribute the saved workbook to students (e.g. via your LMS, email, or
+   shared drive).
+
+### Student Setup
+
+Students only need two things:
+
+1. Install the **xlwings Lite** add-in from the
+   [Microsoft AppSource store](https://marketplace.microsoft.com/en-us/product/office/WA200008175) (free, one-time).
+2. Open the workbook provided by the instructor.
+
+The scripts and custom functions load automatically — no file copying, no
+folder mounting, and no security pop-ups beyond the initial add-in install.
 
 ---
 
@@ -111,7 +143,9 @@ xlwings-lite-stats/
 
 1. **Edit locally**: Clone this repo, edit the relevant `.py` file in your editor of choice.
 2. **Commit**: Push your changes to GitHub as usual.
-3. **Update Excel**: Open the xlwings Lite editor, navigate to the changed file, and paste the updated contents. Click **Restart** to reload.
+3. **Update the workbook**: Open the xlwings Lite editor, use **Import** to
+   re-import the changed files (or paste updated contents manually), then
+   click **Restart** to reload. Save the workbook to persist the changes.
 
 ```bash
 git clone https://github.com/hrustan/xlwings-lite-stats.git
@@ -121,6 +155,10 @@ git add .
 git commit -m "Your change description"
 git push
 ```
+
+> **Tip:** Use the **Export** button in the xlwings Lite editor to export files
+> back to your local repo before committing, so the repo always stays in sync
+> with the workbook.
 
 ---
 
